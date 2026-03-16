@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دەنگدانی 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>🏆 پێشبڕکێی شاجوانی تیکتۆک 2026</h1>
+        <p>شاجوانی گۆی زەوی دیاری بکە</p>
+        <div class="total-votes-container">
+            <p>کۆی گشتی دەنگەکان تا ئێستا:</p>
+            <div id="live-total-count">0</div>
+        </div>
+    </header>
+    <div class="countdown-wrapper">
+        <div id="timer">
+            <div class="time-box"><span id="days">00</span>
+                <p>ڕۆژ</p>
+            </div>
+            <div class="time-box"><span id="hours">00</span>
+                <p>سەعات</p>
+            </div>
+            <div class="time-box"><span id="minutes">00</span>
+                <p>خولەک</p>
+            </div>
+            <div class="time-box"><span id="seconds">00</span>
+                <p>چرکە</p>
+            </div>
+        </div>
+        <div id="status-msg"></div>
+    </div>
+
+    <div class="container" id="candidates-grid">
+    </div>
+
+    <footer>
+        <div class="admin-access">
+            <a href="login.html" class="admin-btn">
+                <span class="icon">🔐</span>
+                <span class="text">بەشی بەڕێوبەرایەتی</span>
+            </a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

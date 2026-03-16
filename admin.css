@@ -1,0 +1,80 @@
+:root {
+    --admin-bg: #121212;
+    --card-bg: #1e1e1e;
+    --primary: #ff0050;
+    /* تیکتۆک */
+    --accent: #00f2ea;
+    /* تیکتۆک */
+    --text: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-color: var(--admin-bg);
+    color: var(--text);
+    direction: rtl;
+    padding: 20px;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+input[type="password"] {
+    width: 90%;
+    padding: 12px;
+    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #000;
+    color: white;
+}
+
+.dashboard {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.chart-container {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 20px;
+    margin-top: 30px;
+}
+
+.bar-wrapper {
+    margin-bottom: 20px;
+}
+
+.label-group {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.bar-background {
+    background: #333;
+    height: 25px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    width: 0%;
+    /* بە جاڤاسکریپت دەگۆڕێت */
+    transition: width 1s ease-in-out;
+}
+
+.winner-badge {
+    color: gold;
+    font-size: 0.8rem;
+    margin-right: 10px;
+}

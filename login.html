@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+    <div class="login-container" style="max-width:300px; margin: 100px auto; text-align:center;">
+        <input type="password" id="pass" placeholder="پاسۆرد بنووسە" style="padding:10px; width:100%;">
+        <button onclick="checkAdmin()" style="margin-top:10px;">چوونە ژوورەوە</button>
+    </div>
+    <script>
+        function checkAdmin() {
+            if (document.getElementById('pass').value === "Hozan2026$$_Kurdistan-tiktok") { // پاسۆرد لێرە بگۆڕە
+                sessionStorage.setItem("isAdmin", "true");
+                window.location.href = "admin.html";
+            } else { alert("هەڵەیە!"); }
+        }
+    </script>
+</body>
+
+</html>

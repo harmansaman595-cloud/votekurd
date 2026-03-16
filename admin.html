@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پانێڵی بەڕێوبەر</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard">
+        <header>
+            <h1>📊 ئەنجامەکانی دەنگدان</h1>
+            <button onclick="logout()" style="width: auto; padding: 5px 15px; background: #555;">چوونە دەرەوە</button>
+        </header>
+
+        <div id="admin-results" class="chart-container">
+            <p style="text-align: center;">خەریکی بارکردنی دەنگەکانە...</p>
+        </div>
+    </div>
+
+    <script>
+        // ١. دڵنیابوونەوە لەوەی ئەدمین پێشتر لۆگینی کردووە
+        if (sessionStorage.getItem("isAdmin") !== "true") {
+            window.location.href = "login.html";
+        }
+
+        // ٢. زانیارییەکانی فایەربەیسەکەت (هەمان ئەوەی لە script.js داتناوە لێرەش دایبنێ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDACeorYGIVhIDnEtHXbZ8H5BUsgfsLE5A",
+            authDomain: "voting-aa7be.firebaseapp.com",
+            projectId: "voting-aa7be",
+            storageBucket: "voting-aa7be.firebasestorage.app",
+            messagingSenderId: "699626306006",
+            appId: "1:699626306006:web:23464a4ceb9ab8f32a0c77",
+            measurementId: "G-WYSKFKGXVK"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ٣. خوێندنەوەی دەنگەکان و ڕیزکردنیان
+        db.collection("votes").onSnapshot(snapshot => {
+            const results = {};
+            let total = snapshot.size;
+
+            if (total === 0) {
+                document.getElementById('admin-results').innerHTML = "<p>هیچ دەنگێک نەدراوە!</p>";
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const name = doc.data().candidate;
+                results[name] = (results[name] || 0) + 1;
+            });
+
+            // ڕیزکردن بەپێی زۆری دەنگ (Ranking)
+            const sorted = Object.entries(results).sort((a, b) => b[1] - a[1]);
+
+            const adminContainer = document.getElementById('admin-results');
+            adminContainer.innerHTML = `<h2 style="text-align:center;">کۆی گشتی دەنگەکان: ${total}</h2><br>`;
+
+            sorted.forEach(([name, count]) => {
+                const percent = ((count / total) * 100).toFixed(1);
+                adminContainer.innerHTML += `
+                    <div style="margin-bottom:25px; background:#222; padding:15px; border-radius:10px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <strong style="color:#25f4ee;">${name}</strong> 
+                            <span>${count} دەنگ (${percent}%)</span>
+                        </div>
+                        <div class="bar-container" style="background:#444; height:15px; border-radius:10px; overflow:hidden;">
+                            <div class="bar-fill" style="width:${percent}%; background:linear-gradient(90deg, #fe2c55, #25f4ee); height:100%; transition:1s;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        function logout() {
+            sessionStorage.removeItem("isAdmin");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+
+</html>
