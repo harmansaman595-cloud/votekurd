@@ -57,10 +57,10 @@ function listenToTotalVotes() {
 listenToTotalVotes();
 
 const candidates = [
-    { id: 1, name: "تەمۆ", img: "tamo_cleanup_cropped.jpg", quote: "لەگە ژنی قسەم دەکرد دەوی ئاوی دەکرد لەخۆشیان" },
-    { id: 2, name: "ئازە بێمنەت", img: "aza_cleanup.jpg", quote: "مافی ئەوەت هەییە وەک سەگ بژی بەڵام مافی ئەوەت نییە بە ئێمە بوەڕی هەی نامەرد" },
-    { id: 3, name: "هۆشمەند", img: "hosha.jpg", quote: "دەی دەی دەی بویمە جۆرە هۆشمەندەک هەتا ئەتوو فێڵەکم لێدەکەی ئەمن دە فێڵانت لێدەکەم" },
-    { id: 4, name: "هەردی DJ", img: "hardi_cleanup.jpg", quote: "هیچ لێدوانێکم نییە بۆ ئەم کاتە" }
+    { id: 1, name: "تەمۆ", img: "tamo_cleanup_cropped.JPG", quote: "لەگە ژنی قسەم دەکرد دەوی ئاوی دەکرد لەخۆشیان" },
+    { id: 2, name: "ئازە بێمنەت", img: "aza_cleanup.JPG", quote: "مافی ئەوەت هەییە وەک سەگ بژی بەڵام مافی ئەوەت نییە بە ئێمە بوەڕی هەی نامەرد" },
+    { id: 3, name: "هۆشمەند", img: "hosha.JPG", quote: "دەی دەی دەی بویمە جۆرە هۆشمەندەک هەتا ئەتوو فێڵەکم لێدەکەی ئەمن دە فێڵانت لێدەکەم" },
+    { id: 4, name: "هەردی DJ", img: "hardi_cleanup.JPG", quote: "هیچ لێدوانێکم نییە بۆ ئەم کاتە" }
 ];
 
 const grid = document.getElementById('candidates-grid');
