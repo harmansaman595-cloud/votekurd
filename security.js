@@ -5,7 +5,11 @@
 (function () {
     'use strict';
 
-    // 1. Disable right-click context menu
+    // Detect if user is on a mobile/touch device
+    var _isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                    ('ontouchstart' in window);
+
+    // 1. Disable right-click context menu (desktop only to not annoy mobile)
     document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
     });
@@ -26,35 +30,38 @@
         if (e.ctrlKey && e.keyCode === 83) { e.preventDefault(); return false; }
     });
 
-    // 3. DevTools open detection (window size method)
-    var _devOpen = false;
-    var _threshold = 160;
+    // 3. DevTools open detection — DESKTOP ONLY
+    // Mobile browsers have large UI chrome (address bar etc) that creates false positives
+    if (!_isMobile) {
+        var _devOpen = false;
+        var _threshold = 200; // Must be large enough gap to only catch actual DevTools panels
 
-    setInterval(function () {
-        var widthDiff = window.outerWidth - window.innerWidth;
-        var heightDiff = window.outerHeight - window.innerHeight;
+        setInterval(function () {
+            var widthDiff = window.outerWidth - window.innerWidth;
+            var heightDiff = window.outerHeight - window.innerHeight;
 
-        if (widthDiff > _threshold || heightDiff > _threshold) {
-            if (!_devOpen) {
-                _devOpen = true;
-                document.body.innerHTML =
-                    '<div style="background:#0f0f0f;color:#fe2c55;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;">' +
-                    '<h1 style="font-size:60px;">🚫</h1>' +
-                    '<h2>ڕێگەپێنەدراوە!</h2>' +
-                    '<p>تکایە DevTools داخە و پەڕەکە نوێ بکەرەوە.</p>' +
-                    '</div>';
+            if (widthDiff > _threshold || heightDiff > _threshold) {
+                if (!_devOpen) {
+                    _devOpen = true;
+                    document.body.innerHTML =
+                        '<div style="background:#0f0f0f;color:#fe2c55;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;">' +
+                        '<h1 style="font-size:60px;">🚫</h1>' +
+                        '<h2>ڕێگەپێنەدراوە!</h2>' +
+                        '<p>تکایە DevTools داخە و پەرەکە نوێ بکەرەوە.</p>' +
+                        '</div>';
+                }
+            } else {
+                _devOpen = false;
             }
-        } else {
-            _devOpen = false;
-        }
-    }, 500);
+        }, 500);
+    }
 
     // 4. Console clear loop — makes console unusable
-    var _consoleClear = setInterval(function () {
+    setInterval(function () {
         console.clear();
     }, 100);
 
-    // 5. Block console.log / warn / error / table / dir from being useful
+    // 5. Block console methods from being useful
     try {
         var _noop = function () { };
         ['log', 'warn', 'error', 'info', 'table', 'dir', 'trace'].forEach(function (method) {
