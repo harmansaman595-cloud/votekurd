@@ -7,6 +7,7 @@
     <title>پانێڵی بەڕێوبەر</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
 </head>
@@ -20,56 +21,64 @@
         </header>
 
         <div id="admin-results" class="chart-container">
-            <p style="text-align: center;">خەریکی بارکردنی دەنگەکانە...</p>
+            <p style="text-align: center;">چاوەڕوانبە...</p>
         </div>
     </div>
 
     <script>
-        // ١. دڵنیابوونەوە لەوەی ئەدمین پێشتر لۆگینی کردووە
-        if (sessionStorage.getItem("isAdmin") !== "true") {
-            window.location.href = "login.html";
-        }
-
-        // ٣. خوێندنەوەی دەنگەکان و ڕیزکردنیان
-        db.collection("votes").onSnapshot(snapshot => {
-            const results = {};
-            let total = snapshot.size;
-
-            if (total === 0) {
-                document.getElementById('admin-results').innerHTML = "<p>هیچ دەنگێک نەدراوە!</p>";
-                return;
+        // 🔒 Server-side auth check — cannot be faked from console
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                // Not logged in — redirect immediately
+                window.location.href = "login.html";
+            } else {
+                // User is verified — load the results
+                loadResults();
             }
-
-            snapshot.forEach(doc => {
-                const name = doc.data().candidate;
-                results[name] = (results[name] || 0) + 1;
-            });
-
-            // ڕیزکردن بەپێی زۆری دەنگ (Ranking)
-            const sorted = Object.entries(results).sort((a, b) => b[1] - a[1]);
-
-            const adminContainer = document.getElementById('admin-results');
-            adminContainer.innerHTML = `<h2 style="text-align:center;">کۆی گشتی دەنگەکان: ${total}</h2><br>`;
-
-            sorted.forEach(([name, count]) => {
-                const percent = ((count / total) * 100).toFixed(1);
-                adminContainer.innerHTML += `
-                    <div style="margin-bottom:25px; background:#222; padding:15px; border-radius:10px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                            <strong style="color:#25f4ee;">${name}</strong> 
-                            <span>${count} دەنگ (${percent}%)</span>
-                        </div>
-                        <div class="bar-container" style="background:#444; height:15px; border-radius:10px; overflow:hidden;">
-                            <div class="bar-fill" style="width:${percent}%; background:linear-gradient(90deg, #fe2c55, #25f4ee); height:100%; transition:1s;"></div>
-                        </div>
-                    </div>
-                `;
-            });
         });
 
+        function loadResults() {
+            db.collection("votes").onSnapshot(snapshot => {
+                const results = {};
+                let total = snapshot.size;
+
+                if (total === 0) {
+                    document.getElementById('admin-results').innerHTML = "<p>هیچ دەنگێک نەدراوە!</p>";
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const name = doc.data().candidate;
+                    results[name] = (results[name] || 0) + 1;
+                });
+
+                // Sort by votes (Ranking)
+                const sorted = Object.entries(results).sort((a, b) => b[1] - a[1]);
+
+                const adminContainer = document.getElementById('admin-results');
+                adminContainer.innerHTML = `<h2 style="text-align:center;">کۆی گشتی دەنگەکان: ${total}</h2><br>`;
+
+                sorted.forEach(([name, count]) => {
+                    const percent = ((count / total) * 100).toFixed(1);
+                    adminContainer.innerHTML += `
+                        <div style="margin-bottom:25px; background:#222; padding:15px; border-radius:10px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <strong style="color:#25f4ee;">${name}</strong> 
+                                <span>${count} دەنگ (${percent}%)</span>
+                            </div>
+                            <div class="bar-container" style="background:#444; height:15px; border-radius:10px; overflow:hidden;">
+                                <div class="bar-fill" style="width:${percent}%; background:linear-gradient(90deg, #fe2c55, #25f4ee); height:100%; transition:1s;"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
         function logout() {
-            sessionStorage.removeItem("isAdmin");
-            window.location.href = "login.html";
+            auth.signOut().then(() => {
+                window.location.href = "login.html";
+            });
         }
     </script>
 </body>

@@ -37,23 +37,45 @@ const timerInterval = setInterval(function () {
 }, 1000);
 
 
-// ئەم فانکشنە بانگ بکە بۆ خوێندنەوەی کۆی دەنگەکان بە شێوەی ڕاستەوخۆ
+// =============================================
+// 🛡️ Device fingerprint — unique ID per browser
+// =============================================
+function getDeviceFingerprint() {
+    const raw = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width + 'x' + screen.height,
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+    ].join('|');
+
+    // Simple hash
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++) {
+        hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+        hash |= 0;
+    }
+    return 'fp_' + Math.abs(hash).toString(36);
+}
+
+const _deviceId = getDeviceFingerprint();
+
+// Check Firestore server-side if this device already voted
+async function checkIfAlreadyVoted() {
+    const snap = await db.collection("votes").where("deviceId", "==", _deviceId).limit(1).get();
+    return !snap.empty;
+}
+
+// Live total vote counter
 function listenToTotalVotes() {
     db.collection("votes").onSnapshot((snapshot) => {
-        const totalVotes = snapshot.size; // ژمارەی هەموو دۆکیومێنتەکان وەردەگرێت
+        const totalVotes = snapshot.size;
         const countElement = document.getElementById("live-total-count");
-
-        // ئەنیمەیشنی گۆڕانی ژمارەکە (تەزوو)
         countElement.style.transform = "scale(1.2)";
         countElement.innerText = totalVotes;
-
-        setTimeout(() => {
-            countElement.style.transform = "scale(1)";
-        }, 200);
+        setTimeout(() => { countElement.style.transform = "scale(1)"; }, 200);
     });
 }
 
-// لە کۆتایی فایلەکە یان لە دوای initialize کردنی فایەربەیس بانگی بکە
 listenToTotalVotes();
 
 const candidates = [
@@ -83,40 +105,50 @@ candidates.forEach(c => {
 });
 
 // =============================================
-// 🔒 پاراستنی دەنگدان لە هاکەر (Console Protection)
+// 🔒 Vote Protection — localStorage + Firestore
 // =============================================
 
-// ئەم ڤاریبڵە تایبەتە بۆ ناوخۆ - هاکەر ناتوانێت بیگۆڕێت
 let _voteInProgress = false;
 let _hasVotedSecure = !!localStorage.getItem("votedFor");
 
-// ئەم فانکشنە تەنها لە بەتنەکانەوە بانگ دەکرێت
-function _handleVote(name, id) {
-    // 1. پشکنینی ئایا پێشتر دەنگی داوە
-    if (_hasVotedSecure) {
+// On page load: also verify against Firestore (device fingerprint)
+checkIfAlreadyVoted().then(alreadyVoted => {
+    if (alreadyVoted && !_hasVotedSecure) {
+        // Firestore says voted but localStorage was cleared — restore lock
+        localStorage.setItem("votedFor", "__voted__");
+        _hasVotedSecure = true;
+        // Disable all vote buttons
+        document.querySelectorAll('button[id^="btn-"]').forEach(btn => {
+            btn.disabled = true;
+            btn.innerText = "داخراوە";
+        });
+    }
+});
+
+async function _handleVote(name, id) {
+    // 1. Local check
+    if (_hasVotedSecure || localStorage.getItem("votedFor")) {
         alert("تۆ پێشتر دەنگت داوە!");
         return;
     }
 
-    // 2. پشکنینی localStorage (لایەنی دووەم)
-    if (localStorage.getItem("votedFor")) {
+    // 2. Firestore check (server-side)
+    const alreadyVoted = await checkIfAlreadyVoted();
+    if (alreadyVoted) {
+        localStorage.setItem("votedFor", "__voted__");
         _hasVotedSecure = true;
         alert("تۆ پێشتر دەنگت داوە!");
         return;
     }
 
-    // 3. ڕێگری لە دووبارە ناردن
-    if (_voteInProgress) {
-        return;
-    }
+    // 3. Prevent double-click
+    if (_voteInProgress) return;
 
-    // 4. پشکنینی ئایا ناوی کاندید دروستە
+    // 4. Validate candidate name
     const validNames = candidates.map(c => c.name);
-    if (!validNames.includes(name)) {
-        return;
-    }
+    if (!validNames.includes(name)) return;
 
-    // 5. پشکنینی ئایا کاتی دەنگدان تەواو نەبووە
+    // 5. Check voting deadline
     if (new Date().getTime() > deadline) {
         alert("ببورە، کاتی دەنگدان بەسەرچووە!");
         return;
@@ -126,6 +158,7 @@ function _handleVote(name, id) {
 
     db.collection("votes").add({
         candidate: name,
+        deviceId: _deviceId,          // 🛡️ stored server-side
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         localStorage.setItem("votedFor", name);
@@ -138,50 +171,17 @@ function _handleVote(name, id) {
 }
 
 // =============================================
-// 🛡️ لەکارخستنی فانکشنە گەورەکان لە کۆنسۆل
+// 🛡️ Lock _handleVote so it can't be overwritten from console
 // =============================================
 
-// سڕینەوەی فانکشنی vote ی کۆنە لە window
-// هاکەر ناتوانێت vote() بنووسێت لە کۆنسۆل
 Object.defineProperty(window, 'vote', {
-    value: function() {
-        console.warn("🚫 ڕێگەپێنەدراوە! ئەم فانکشنە پاراستراوە.");
-    },
+    value: function() { console.warn("🚫 ڕێگەپێنەدراوە!"); },
     writable: false,
     configurable: false
 });
 
-// پاراستنی _handleVote لە گۆڕین
 Object.defineProperty(window, '_handleVote', {
     value: _handleVote,
     writable: false,
     configurable: false
 });
-
-// پاراستنی localStorage.removeItem بۆ "votedFor"
-// بۆ ڕێگری لە سڕینەوەی localStorage.removeItem("votedFor")
-const _originalRemoveItem = localStorage.removeItem.bind(localStorage);
-localStorage.removeItem = function(key) {
-    if (key === "votedFor") {
-        console.warn("🚫 ناتوانیت ئەم داتایە بسڕیتەوە!");
-        return;
-    }
-    _originalRemoveItem(key);
-};
-
-// پاراستنی localStorage.setItem بۆ "votedFor"
-// بۆ ڕێگری لە گۆڕینی بەهای votedFor
-const _originalSetItem = localStorage.setItem.bind(localStorage);
-localStorage.setItem = function(key, value) {
-    if (key === "votedFor" && localStorage.getItem("votedFor")) {
-        console.warn("🚫 ناتوانیت دەنگەکەت بگۆڕیت!");
-        return;
-    }
-    _originalSetItem(key, value);
-};
-
-// پاراستنی localStorage.clear
-const _originalClear = localStorage.clear.bind(localStorage);
-localStorage.clear = function() {
-    console.warn("🚫 ناتوانیت داتاکان بسڕیتەوە!");
-};

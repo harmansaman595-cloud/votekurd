@@ -1,25 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ku" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>چوونەژوورەوەی بەڕێوبەر</title>
     <link rel="stylesheet" href="login.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
 </head>
 
 <body>
-    <div class="login-container" style="max-width:300px; margin: 100px auto; text-align:center;">
-        <input type="password" id="pass" placeholder="پاسۆرد بنووسە" style="padding:10px; width:100%;">
-        <button onclick="checkAdmin()" style="margin-top:10px;">چوونە ژوورەوە</button>
+    <div class="login-container" style="max-width:360px; margin: 100px auto; text-align:center; padding: 30px; background:#1a1a1a; border-radius:16px; border:1px solid #333;">
+        <h2 style="color:#25f4ee; margin-bottom:20px;">🔐 بەشی بەڕێوبەرایەتی</h2>
+        <input type="email" id="email" placeholder="ئیمەیڵ" style="padding:10px; width:100%; margin-bottom:10px; border-radius:8px; border:1px solid #444; background:#111; color:#fff; box-sizing:border-box;">
+        <input type="password" id="pass" placeholder="پاسۆرد" style="padding:10px; width:100%; margin-bottom:15px; border-radius:8px; border:1px solid #444; background:#111; color:#fff; box-sizing:border-box;">
+        <button id="loginBtn" onclick="checkAdmin()" style="width:100%; padding:12px; background:#fe2c55; border:none; border-radius:10px; color:#fff; font-weight:bold; cursor:pointer; font-size:16px;">چوونەژوورەوە</button>
+        <p id="error-msg" style="color:#fe2c55; margin-top:12px; min-height:20px;"></p>
     </div>
+
     <script>
-        function checkAdmin() {
-            if (document.getElementById('pass').value === "Hozan2026$$_Kurdistan-tiktok") { // پاسۆرد لێرە بگۆڕە
-                sessionStorage.setItem("isAdmin", "true");
+        // If user is already logged in, redirect immediately
+        auth.onAuthStateChanged(user => {
+            if (user) {
                 window.location.href = "admin.html";
-            } else { alert("هەڵەیە!"); }
+            }
+        });
+
+        function checkAdmin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('pass').value;
+            const btn = document.getElementById('loginBtn');
+            const errMsg = document.getElementById('error-msg');
+
+            if (!email || !password) {
+                errMsg.textContent = "تکایە ئیمەیڵ و پاسۆردت بنووسە";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "چاوەڕوانبە...";
+            errMsg.textContent = "";
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    window.location.href = "admin.html";
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.textContent = "چوونەژوورەوە";
+                    errMsg.textContent = "ئیمەیڵ یان پاسۆرد هەڵەیە!";
+                });
         }
+
+        // Allow Enter key to submit
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') checkAdmin();
+        });
     </script>
 </body>
 

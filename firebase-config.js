@@ -1,4 +1,4 @@
-// 🔥 Firebase Configuration — ئەم فایلە زیاد بکە بۆ .gitignore
+// 🔥 Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDZCSjDzJ27tPqGWne_zpbNuSX9M_rpsLQ",
     authDomain: "votekrd.firebaseapp.com",
@@ -11,3 +11,4 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
