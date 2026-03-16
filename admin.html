@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
 </head>
 
 <body>
@@ -28,20 +29,6 @@
         if (sessionStorage.getItem("isAdmin") !== "true") {
             window.location.href = "login.html";
         }
-
-        // ٢. زانیارییەکانی فایەربەیسەکەت (هەمان ئەوەی لە script.js داتناوە لێرەش دایبنێ)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDACeorYGIVhIDnEtHXbZ8H5BUsgfsLE5A",
-            authDomain: "voting-aa7be.firebaseapp.com",
-            projectId: "voting-aa7be",
-            storageBucket: "voting-aa7be.firebasestorage.app",
-            messagingSenderId: "699626306006",
-            appId: "1:699626306006:web:23464a4ceb9ab8f32a0c77",
-            measurementId: "G-WYSKFKGXVK"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
 
         // ٣. خوێندنەوەی دەنگەکان و ڕیزکردنیان
         db.collection("votes").onSnapshot(snapshot => {
