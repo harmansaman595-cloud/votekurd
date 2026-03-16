@@ -69,7 +69,7 @@ candidates.forEach(c => {
     const hasVoted = localStorage.getItem("votedFor");
     grid.innerHTML += `
         <div class="card">
-            <img src="${c.img}" alt="${c.name}" class="c-img img-${c.id}>
+            <img src="${c.img}" alt="${c.name}" class="c-img img-${c.id}">
             <div class="info">
                 <h2>${c.name}</h2>
                 <p class="quote">"${c.quote}"</p>
