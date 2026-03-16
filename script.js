@@ -170,7 +170,23 @@ async function _handleVote(name, id) {
     }).then(() => {
         localStorage.setItem("votedFor", name);
         _hasVotedSecure = true;
-        location.reload();
+        
+        // 1. Immediately update UI (crucial for mobile responsiveness)
+        document.querySelectorAll('button[id^="btn-"]').forEach(btn => {
+            btn.disabled = true;
+            btn.innerText = "داخراوە"; // Closed
+        });
+        const votedBtn = document.getElementById(`btn-${id}`);
+        if(votedBtn) {
+            votedBtn.innerText = 'دەنگت داوە ✅';
+            votedBtn.style.backgroundColor = '#4CAF50';
+        }
+
+        // 2. Reload after a short delay so localStorage has time to persist on iOS
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 800);
+
     }).catch((err) => {
         _voteInProgress = false;
         alert("هەڵەیەک ڕوویدا لە کاتی دەنگدان: " + err.message);
