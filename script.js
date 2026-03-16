@@ -80,7 +80,7 @@ listenToTotalVotes();
 
 const candidates = [
     { id: 1, name: "تەمۆ", img: "tamo.jpg", quote: "لەگە ژنی قسەم دەکرد دەوی ئاوی دەکرد لەخۆشیان" },
-    { id: 2, name: "ئازە بێمنەت", img: "hosha.JPG", quote: "مافی ئەوەت هەییە وەک سەگ بژی بەڵام مافی ئەوەت نییە بە ئێمە بوەڕی هەی نامەرد" },
+    { id: 2, name: "ئازە بێمنەت", img: "aza_cleanup.JPG", quote: "مافی ئەوەت هەییە وەک سەگ بژی بەڵام مافی ئەوەت نییە بە ئێمە بوەڕی هەی نامەرد" },
     { id: 3, name: "هۆشمەند", img: "hoshmand.jpg", quote: "دەی دەی دەی بویمە جۆرە هۆشمەندەک هەتا ئەتوو فێڵەکم لێدەکەی ئەمن دە فێڵانت لێدەکەم" },
     { id: 4, name: "هەردی DJ", img: "hardi.jpg", quote: "هیچ لێدوانێکم نییە بۆ ئەم کاتە" }
 ];
@@ -175,7 +175,7 @@ async function _handleVote(name, id) {
 // =============================================
 
 Object.defineProperty(window, 'vote', {
-    value: function() { console.warn("🚫 ڕێگەپێنەدراوە!"); },
+    value: function () { console.warn("🚫 ڕێگەپێنەدراوە!"); },
     writable: false,
     configurable: false
 });
