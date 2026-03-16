@@ -61,8 +61,13 @@ const _deviceId = getDeviceFingerprint();
 
 // Check Firestore server-side if this device already voted
 async function checkIfAlreadyVoted() {
-    const snap = await db.collection("votes").where("deviceId", "==", _deviceId).limit(1).get();
-    return !snap.empty;
+    try {
+        const snap = await db.collection("votes").where("deviceId", "==", _deviceId).limit(1).get();
+        return !snap.empty;
+    } catch (e) {
+        // If Firestore rules block reading or index is missing, fall back to localStorage
+        return false;
+    }
 }
 
 // Live total vote counter
@@ -132,14 +137,16 @@ async function _handleVote(name, id) {
         return;
     }
 
-    // 2. Firestore check (server-side)
-    const alreadyVoted = await checkIfAlreadyVoted();
-    if (alreadyVoted) {
-        localStorage.setItem("votedFor", "__voted__");
-        _hasVotedSecure = true;
-        alert("تۆ پێشتر دەنگت داوە!");
-        return;
-    }
+    // 2. Firestore check (server-side) — safely falls back if it fails
+    try {
+        const alreadyVoted = await checkIfAlreadyVoted();
+        if (alreadyVoted) {
+            localStorage.setItem("votedFor", "__voted__");
+            _hasVotedSecure = true;
+            alert("تۆ پێشتر دەنگت داوە!");
+            return;
+        }
+    } catch (e) { /* fall through to vote */ }
 
     // 3. Prevent double-click
     if (_voteInProgress) return;
@@ -158,15 +165,15 @@ async function _handleVote(name, id) {
 
     db.collection("votes").add({
         candidate: name,
-        deviceId: _deviceId,          // 🛡️ stored server-side
+        deviceId: _deviceId,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         localStorage.setItem("votedFor", name);
         _hasVotedSecure = true;
         location.reload();
-    }).catch(() => {
+    }).catch((err) => {
         _voteInProgress = false;
-        alert("هەڵەیەک ڕوویدا لە کاتی دەنگدان");
+        alert("هەڵەیەک ڕوویدا لە کاتی دەنگدان: " + err.message);
     });
 }
 
